@@ -1,0 +1,1 @@
+Složka s mapou pro LS11

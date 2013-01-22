@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<careerVehicles>
+    <!-- first row -->
+    <vehicle filename="data/vehicles/steerable/lizard/lizard422.xml" xPosition="150" yOffset="0.5" zPosition="-210" yRotation="180"/>
+    <vehicle filename="data/vehicles/steerable/lizard/lizard58.xml" xPosition="150" yOffset="0.5" zPosition="-220" yRotation="180"/>
+    <vehicle filename="data/vehicles/cutters/lizard/lizard58Cutter.xml" xPosition="150" yOffset="0.5" zPosition="-225" yRotation="0"/>
+    
+    <!-- second row -->
+    <vehicle filename="data/vehicles/trailers/smallTipper.xml" xPosition="140" yOffset="0.5" zPosition="-210" yRotation="180"/>
+    <vehicle filename="data/vehicles/tools/cultivator01.xml" xPosition="140" yOffset="0.5" zPosition="-250"  yRotation="180"/>
+    <vehicle filename="data/vehicles/tools/sowingMachine01.xml" xPosition="140" yOffset="0.5" zPosition="-220" yRotation="180"/>
+    <vehicle filename="data/vehicles/tools/plough01.xml" xPosition="140" yOffset="0.5" zPosition="-225" yRotation="180"/>
+    <vehicle filename="data/vehicles/tools/triton200.xml" xPosition="140" yOffset="0.5" zPosition="-230" yRotation="180"/>
+    
+    <!-- cow zone -->
+    <vehicle filename="data/vehicles/steerable/lizard/lizard2850.xml" xPosition="130" yOffset="0.5" zPosition="-220" yRotation="0"/>
+    
+    <!-- field -->
+    <vehicle filename="data/vehicles/steerable/lizard/lizard7210.xml" xPosition="130" yOffset="0.5" zPosition="-210" yRotation="180"/>
+    <vehicle filename="data/vehicles/cutters/lizard/lizardCutter7210.xml" xPosition="130" yOffset="0.5" zPosition="-230" yRotation="0"/>
+</careerVehicles>

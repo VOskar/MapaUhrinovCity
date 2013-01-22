@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="1.0" classRequirement="">
+    <LodLevel startDistance="0" subsequentPassForceMode="ignore">
+        <Parameters>
+            <Parameter name="partScale" target="In.mat.partScale" type="float4"/>
+            <Parameter name="rainScale" target="In.mat.rainScale" type="float4"/>
+        </Parameters>
+        <Textures>
+            <Texture name="sunsetTexture" />
+            <Texture name="nightTexture" />
+            <Texture name="sunriseTexture" />
+            <Texture name="rainTexture" />
+        </Textures>
+        <CodeInjections>
+            <CodeInjection position="VS_END">
+<![CDATA[
+Out.position.z = Out.position.w;
+]]>
+            </CodeInjection>
+            <CodeInjection position="SAMPLERS">
+<![CDATA[
+uniform sampler2D sunsetTexture : TEXUNITN;
+uniform sampler2D nightTexture : TEXUNITN;
+uniform sampler2D sunriseTexture : TEXUNITN;
+uniform sampler2D rainTexture : TEXUNITN;
+]]>
+            </CodeInjection>
+            <CodeInjection position="MATERIALINFO">
+<![CDATA[
+uniform float4 partScale;
+uniform float4 rainScale;
+]]>
+            </CodeInjection>
+            <CodeInjection position="EMISSIVE_FS">
+<![CDATA[
+
+float3 emissiveColorSunset = tex2D(In.samplers.sunsetTexture, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy).xyz;
+float3 emissiveColorNight = tex2D(In.samplers.nightTexture, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy).xyz;
+float3 emissiveColorSunrise = tex2D(In.samplers.sunriseTexture, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy).xyz;
+float3 emissiveColorRain = tex2D(In.samplers.rainTexture, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy).xyz;
+emissiveColor.xyz = emissiveColor.xyz*In.mat.partScale.x + emissiveColorSunset.xyz*In.mat.partScale.y + emissiveColorNight.xyz*In.mat.partScale.z + emissiveColorSunrise.xyz*In.mat.partScale.w + emissiveColorRain*In.mat.rainScale.x;
+
+]]>
+            </CodeInjection>
+        </CodeInjections>
+    </LodLevel>
+</CustomShader>

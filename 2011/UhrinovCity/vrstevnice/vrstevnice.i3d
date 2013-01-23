@@ -35,7 +35,7 @@
         <Subset firstVertex="0" numVertices="4" firstIndex="0" numIndices="6"/>
       </Subsets>
     </IndexedTriangleSet>
-    <NurbsCurve name="splineGeometry" shapeId="2" degree="3" form="close">
+    <NurbsCurve name="splineGeometry" shapeId="2" degree="3" form="closed">
       <cv c="50.6356 0 39.2159"/>
       <cv c="61.7941 0 12.3647"/>
       <cv c="62.3997 0 -11.828"/>
@@ -53,9 +53,10 @@
       <cv c="-6.12293 0 41.3709"/>
       <cv c="-1.77877 0 51.5124"/>
       <cv c="7.70899 0 60.5325"/>
-      <cv c="17.1968 0 65.391"/>
-      <cv c="36.1723 0 59.9671"/>
-      <cv c="47.1266 0 47.0107"/>
+      <cv c="17.1968 0 64.244"/>
+      <cv c="26.6845 0 63.8569"/>
+      <cv c="36.1723 0 59.6346"/>
+      <cv c="46.3122 0 47.0107"/>
     </NurbsCurve>
   </Shapes>
 

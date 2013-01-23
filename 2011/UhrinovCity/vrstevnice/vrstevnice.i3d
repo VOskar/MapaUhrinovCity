@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<i3D name="map01" version="1.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://i3d.giants.ch/schema/i3d-1.6.xsd">
+  <Asset>
+    <Export program="GIANTS Editor" version="4.1.9"/>
+  </Asset>
+
+  <Files>
+    <File fileId="2" filename="./vysledna.png" relativePath="true"/>
+  </Files>
+
+
+  <Materials>
+    <Material name="lambert10" materialId="12" diffuseColor="0 0 0 1" ambientColor="0 0 0" allowFog="false">
+      <Emissivemap fileId="2" wrap="false"/>
+    </Material>
+    <Material name="UnnamedMaterial" materialId="20" diffuseColor="1 1 1 1" ambientColor="1 1 1">
+    </Material>
+  </Materials>
+
+
+  <Shapes>
+    <IndexedTriangleSet name="pdaShape" shapeId="1" bvCenter="0 200 0" bvRadius="3686.34">
+      <Vertices count="4" normal="true" uv0="true">
+        <v p="-4000 0 -4000" n="0 1 0" t0="0 1"/>
+        <v p="-4000 0 4000" n="0 1 0" t0="0 0"/>
+        <v p="4000 0 4000" n="0 1 0" t0="1 0"/>
+        <v p="4000 0 -4000" n="0 1 0" t0="1 1"/>
+      </Vertices>
+      <Triangles count="2">
+        <t vi="0 1 2"/>
+        <t vi="0 2 3"/>
+      </Triangles>
+      <Subsets count="1">
+        <Subset firstVertex="0" numVertices="4" firstIndex="0" numIndices="6"/>
+      </Subsets>
+    </IndexedTriangleSet>
+    <NurbsCurve name="splineGeometry" shapeId="2" degree="3" form="close">
+      <cv c="50.6356 0 39.2159"/>
+      <cv c="61.7941 0 12.3647"/>
+      <cv c="62.3997 0 -11.828"/>
+      <cv c="55.3438 0 -27.61"/>
+      <cv c="49.0217 0 -35.595"/>
+      <cv c="43.2121 0 -37.9778"/>
+      <cv c="37.4026 0 -39.0294"/>
+      <cv c="31.0465 0 -36.5152"/>
+      <cv c="24.6904 0 -34.2529"/>
+      <cv c="14.7842 0 -25.2874"/>
+      <cv c="4.878 0 -12.1932"/>
+      <cv c="-2.22127 0 0.666686"/>
+      <cv c="-7.04117 0 14.7183"/>
+      <cv c="-8.04793 0 27.7679"/>
+      <cv c="-6.12293 0 41.3709"/>
+      <cv c="-1.77877 0 51.5124"/>
+      <cv c="7.70899 0 60.5325"/>
+      <cv c="17.1968 0 65.391"/>
+      <cv c="36.1723 0 59.9671"/>
+      <cv c="47.1266 0 47.0107"/>
+    </NurbsCurve>
+  </Shapes>
+
+
+  <Dynamics>
+  </Dynamics>
+
+  <Scene>
+    <TransformGroup name="vrstevnice" nodeId="22">
+      <Shape name="podklady" translation="0 0 10" scale="0.831 1 0.81" objectMask="16777215" nodeId="23" materialIds="12" shapeId="1"/>
+      <TransformGroup name="470" nodeId="24"/>
+      <TransformGroup name="osecnice" nodeId="25">
+        <Shape name="spline" translation="-2263.09 0 -2471.26" nodeId="27" shapeId="2"/>
+      </TransformGroup>
+    </TransformGroup>
+  </Scene>
+
+</i3D>

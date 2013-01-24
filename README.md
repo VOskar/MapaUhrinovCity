@@ -7,7 +7,7 @@ Zatím pouze testovací verze.
 Víc podrobností v Changes.log
 
 Vývojáøi:
-	Qwido
-	VOskar
+Qwido
+VOskar
          
          

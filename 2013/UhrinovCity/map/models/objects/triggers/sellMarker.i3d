@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<i3D name="sellMarker" version="1.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://i3d.giants.ch/schema/i3d-1.6.xsd">
+  <Asset>
+    <Export program="GIANTS Editor" version="4.1.9"/>
+  </Asset>
+
+  <Files>
+    <File fileId="1" filename="warningLines_diffuse.png" relativePath="true"/>
+  </Files>
+
+
+  <Materials>
+    <Material name="warningLines_mat" materialId="10" ambientColor="1 1 1">
+      <Texture fileId="1"/>
+    </Material>
+  </Materials>
+
+
+  <Shapes>
+    <IndexedTriangleSet name="sellMarker" shapeId="1" bvCenter="0 0.05 0" bvRadius="6.93397">
+      <Vertices count="8" normal="true" uv0="true">
+        <v p="-5.8 0.05 3.8" n="0 1 0" t0="-1.17951 1.1111"/>
+        <v p="-5.4 0.05 3.4" n="0 1 0" t0="-1.03809 1.1111"/>
+        <v p="-5.4 0.05 -3.4" n="0 1 0" t0="0.163993 3.51527"/>
+        <v p="-5.8 0.05 -3.8" n="0 1 0" t0="0.163993 3.79811"/>
+        <v p="5.8 0.05 3.8" n="0 1 0" t0="0.871099 -2.99012"/>
+        <v p="5.4 0.05 -3.4" n="0 1 0" t0="2.07318 -0.30311"/>
+        <v p="5.4 0.05 3.4" n="0 1 0" t0="0.871099 -2.70727"/>
+        <v p="5.8 0.05 -3.8" n="0 1 0" t0="2.2146 -0.30311"/>
+      </Vertices>
+      <Triangles count="8">
+        <t vi="0 1 2"/>
+        <t vi="2 3 0"/>
+        <t vi="1 0 4"/>
+        <t vi="3 2 5"/>
+        <t vi="4 6 1"/>
+        <t vi="5 7 3"/>
+        <t vi="6 4 7"/>
+        <t vi="7 5 6"/>
+      </Triangles>
+      <Subsets count="1">
+        <Subset firstVertex="0" numVertices="8" firstIndex="0" numIndices="24"/>
+      </Subsets>
+    </IndexedTriangleSet>
+  </Shapes>
+
+
+  <Dynamics>
+  </Dynamics>
+
+  <Scene>
+    <Shape name="sellMarker" clipDistance="150" nodeId="14" materialIds="10" shapeId="1" receiveShadows="true"/>
+  </Scene>
+
+</i3D>

@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0">
+        <Parameters>
+            <Parameter name="detailUVScale" target="detailUVScale" type="float2"/>
+            <Parameter name="detailUVOffset" target="detailUVOffset" type="float2"/>
+        </Parameters>
+				<Textures>
+					<Texture name="detailTexture" />
+				</Textures>
+        <CodeInjections>
+	        <CodeInjection position="SAMPLERS">
+<![CDATA[
+sampler2D detailTexture : TEXUNITN;
+]]>
+					</CodeInjection>
+          <CodeInjection position="MATERIALINFO">
+<![CDATA[
+float2 detailUVScale;
+float2 detailUVOffset;
+]]>
+          </CodeInjection>
+					<CodeInjection position="NUM_TEXCOORDS">
+<![CDATA[
+#defeval DETAILMAP_TEXCOORD NEXT_TEXCOORD
+]]>
+					</CodeInjection>
+					<CodeInjection position="POST_SET_TEXCOORDS_VS">
+<![CDATA[
+//float2 detailTexture = getTexCoords(In, ALBEDOMAP_INPUT_TEXCOORD)*detailUVScale+detailUVOffset;
+float2 detailTexture = position.xz*detailUVScale+detailUVOffset;
+setTexCoords(Out.texCoords[DETAILMAP_TEXCOORD/2], DETAILMAP_TEXCOORD, detailTexture.xy);
+
+]]>
+        	</CodeInjection>
+        	<CodeInjection position="POST_ALBEDO_FS">
+<![CDATA[
+albedo.xyz *= tex2D(detailTexture, getTexCoords(In, globals, DETAILMAP_TEXCOORD).xy).xyz;
+]]>
+	        	</CodeInjection>
+        	</CodeInjections>
+    </LodLevel>
+</CustomShader>

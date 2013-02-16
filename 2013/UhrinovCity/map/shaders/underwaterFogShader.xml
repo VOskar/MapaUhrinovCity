@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0">
+        <Parameters>
+            <Parameter name="underwaterColor" target="underwaterColor" type="float3"/>
+        </Parameters>
+        <CodeInjections>
+          <CodeInjection position="MATERIALINFO">
+<![CDATA[
+float3 underwaterColor;
+]]>
+          </CodeInjection>
+          <CodeInjection position="FINAL_POS_FS">
+<![CDATA[
+oColor.xyz = underwaterColor.xyz;
+]]>
+            </CodeInjection>
+          </CodeInjections>
+    </LodLevel>
+</CustomShader>

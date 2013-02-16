@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<modDesc descVersion="11">
+    <author>Uhrinov Compani</author>
+    <version>1</version>
+    <title>
+        <en>Uhrinov City size 1.2</en>
+        <de>Uhrinov City 1.2</de>
+        <cz>Uhřínov City tohle nevim kde se ukazuje 1.2</cz>
+    </title>
+    <description>
+        <en>Created by Qwido and VOskar with colaborating ...</en>
+        <de>nemecky neumim</de>
+        <cz>Vytvořeno Qwidem a VOskarem za spolupráce: Káti M. ... tohle taky nevim kde se ukazuje</cz>
+    </description>
+    <iconFilename>map_preview.png</iconFilename>
+    <multiplayer supported="true"/>
+    <l10n>
+        <text name="UhrinovCityBriefingText1">
+            <en>This is the first paragraph. Here you can put a description of your map.</en>
+            <de>Dies ist der erste Textabschnitt. Hier kann beispielsweise eine Beschreibung der Map stehen.</de>
+            <cz>Toto je vývojová verze mapy Uhřínov City</cz>
+        </text>
+        <text name="UhrinovCityBriefingText2">
+            <en>This is the second paragraph.</en>
+            <de>Dies ist der zweite Textabschnitt.</de>
+            <cz>Jedna se pouze o verzi Alpha 0.10 (build 37)&#13;&#10;
+                Vzniklé újmy při tvorbě mapy:&#13;&#10;
+                - uražené zpětné zrcátko&#13;&#10;
+                - spojka na odpis&#13;&#10;
+                &#13;&#10;
+                Mapa je jenom zkuškou 3D modelů a jejich částí !!&#13;&#10;
+                ChangeLog:&#13;&#10;
+                Mapa - odstraněn visualní problém úpravy orné půdy&#13;&#10; 
+                </cz>
+        </text>
+        <text name="UhrinovCityBriefingText3">
+            <en>This is the third paragraph.</en>
+            <de>Dies ist der dritte Textabschnitt.</de>
+            <cz>- doplněn drátový model&#13;&#10; 
+                - odstraněn problikávající obzor na krajích mapy&#13;&#10;
+                - oprava stromů&#13;&#10;  
+                - úprava terénu&#13;&#10;
+                - první cesty&#13;&#10;    
+                PDA - vyplněny bílá místa na mapě&#13;&#10;
+                Shop - funkční&#13;&#10;
+                Budovy - první pokusy
+                </cz>
+        </text>
+    </l10n>
+
+    <maps>
+        <map id="UhrinovCity" className="UhrinovCity" filename="UhrinovCity.lua" defaultVehiclesXMLFilename="defaultVehicles.xml">
+            <title>
+                <en>Uhrinov City size 1.2</en>
+                <de>Uhrinov City 1.2</de>
+                <cz>Uhřínov City 1.2</cz>
+            </title>
+            <description>
+                <en>Created by Qwido and VOskar with colaborating ...</en>
+                <de>nemecky neumim.</de>
+                <cz>Vytvořeno Qwidem a VOskarem za spolupráce:&#13;&#10;
+                Káti M., Popa ...</cz>
+            </description>
+            <briefingImagePrefix>UhrinovCity</briefingImagePrefix>
+            <briefingTextPrefix>UhrinovCity</briefingTextPrefix>
+            <iconFilename>map_preview.png</iconFilename>
+        </map>
+    </maps>
+
+</modDesc>

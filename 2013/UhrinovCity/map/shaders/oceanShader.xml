@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0" subsequentPassForceMode="ignore">
+        <Parameters>
+            <Parameter name="bumpSpeedScale" target="bumpSpeedScale" type="float3" />
+            <Parameter name="reflectionAmount" target="reflectionAmount" type="float3" />
+            <Parameter name="underwaterFogColor" target="underwaterFogColor" type="float3" />
+            <Parameter name="distanceFogInfo" target="distanceFogInfo" type="float4" />
+        </Parameters>
+        <CodeInjections>
+            <CodeInjection position="NUM_TEXCOORDS">
+<![CDATA[
+// only allow directional lights, specular only
+#define NUM_DIFFUSE_LIGHTS 0
+#define NUM_POINT_LIGHTS 0
+#define NUM_SPOT_LIGHTS 0
+
+// for low spec no lights at all
+//#ifdef LOWSPEC
+#define NUM_DIRECTIONAL_LIGHTS 0
+//#endif
+
+
+#if !defined(DEPTH_BLEND_MAP_RENDERING) && (defined(REFLECTION_MAP_2D) || defined(REFLECTION_MAP_CUBE)) && defined(REFRACTION_MAP) && defined(NORMAL_MAP)
+#define WATER_RENDERING
+#endif
+#if defined(WATER_RENDERING)
+//#defeval WATER_NORMALMAP_TEXCOORD1 NEXT_TEXCOORD
+#defeval WATER_NORMALMAP_TEXCOORD1 0
+#defeval WATER_NORMALMAP_TEXCOORD2 NEXT_TEXCOORD
+#defeval WATER_NORMALMAP_TEXCOORD3 NEXT_TEXCOORD
+
+#if defined(DEPTH_BLEND_MAP)
+#define WATER_DEPTH tex2D(depthBlendMap, In.vs.waterDistanceWaterPos.xy).x
+#define WATER_DEPTH_VEC tex2D(depthBlendMap, In.vs.waterDistanceWaterPos.xy)
+#else
+#define WATER_DEPTH 1.0
+#define WATER_DEPTH_VEC float4(0,0,0,0)
+#endif
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="NEED_FS_EYE_VECTOR">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    #if !defined(_NEED_FS_EYE_VECTOR)
+    #define _NEED_FS_EYE_VECTOR
+    #endif
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="CONFIG_DEFINES">
+<![CDATA[
+#if defined(WATER_RENDERING)
+#define _NEED_FS_EYE_VECTOR
+#undef _NO_TANGENTSPACE
+#define _HAS_TEXTURES
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="VS_OUTPUT">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    float2 waterDistanceWaterPos : VARYINGN;
+    //float distanceFogFactor;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="MATERIALINFO">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    float4 bumpSpeedScale;
+    float4 reflectionAmount;
+    float4 underwaterFogColor;
+    float4 distanceFogInfo;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="POST_SET_TEXCOORDS_VS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+float textureScale = bumpSpeedScale.z;
+float2 bumpSpeed = bumpSpeedScale.xy*textureScale;
+
+//float2 translation=float2(fmod(time.y, 1.0/bumpSpeed.x)*bumpSpeed.x, 0);
+float2 translation=float2(time.y*bumpSpeed.x, 0);
+float2 translation2=float2(translation.x, time.y*bumpSpeed.y);
+
+float2 texCoords=In.position.xz*textureScale;
+
+setTexCoords(Out.texCoords[WATER_NORMALMAP_TEXCOORD1/2], WATER_NORMALMAP_TEXCOORD1, texCoords.xy+translation);
+setTexCoords(Out.texCoords[WATER_NORMALMAP_TEXCOORD2/2], WATER_NORMALMAP_TEXCOORD2, texCoords.xy*2.0+translation*4.0);
+setTexCoords(Out.texCoords[WATER_NORMALMAP_TEXCOORD3/2], WATER_NORMALMAP_TEXCOORD3, texCoords.xy*4.0-translation2);
+
+//Out.waterDistanceWaterPos.x = Out.position.w;
+//Out.waterDistanceWaterPos.yz = getTexCoords(In, NORMALMAP_INPUT_TEXCOORD).xy; //In.position.xz;
+Out.waterDistanceWaterPos.xy = getTexCoords(In, NORMALMAP_INPUT_TEXCOORD).xy; //In.position.xz;
+
+//Out.distanceFogFactor = calcFogFactor(length(viewDir.xyz), distanceFogInfo.w, 2); // 2 = exp fog type
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="POST_ALBEDO_FS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+albedo = float4(0, 0, 0, 1);
+diffuseLighting = float3(0,0,0);
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_NORMAL_FS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+// sum normal maps
+// sample from 3 different points so no texture repetition is noticeable
+float3 t0 = tex2D(normalMap, getTexCoords(In, globals, WATER_NORMALMAP_TEXCOORD1)).xyz * 2.0 - 1.0;
+float3 t1 = tex2D(normalMap, getTexCoords(In, globals, WATER_NORMALMAP_TEXCOORD2)).xyz * 2.0 - 1.0;
+float3 t2 = tex2D(normalMap, getTexCoords(In, globals, WATER_NORMALMAP_TEXCOORD3)).xyz * 2.0 - 1.0;
+return normalize((t0.xyz + t1.xyz + t2.xyz));
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_REFRACTION_COLOR_TEX_FS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    float depth = WATER_DEPTH;
+    float2 finalCoord2 = In.vs.reflRefrCoord.xy/In.vs.reflRefrCoord.w;
+    finalCoord2 += normal.xy*reflectionRefractionCoeffScale[3]*depth;
+#if defined(RENDER_DEVICE_DIRECTX_9) || defined(RENDER_DEVICE_GCM)
+	finalCoord2.y = 1-finalCoord2.y;
+#endif
+    return tex2D(refractionMap, finalCoord2).xyz;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_REFRACTION_COLOR_FS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    float softIntersect = WATER_DEPTH_VEC.x;
+
+    float fresnel = getFresnel(facing, reflectionRefractionCoeffScale[0], 5.0);
+    fresnel = saturate(fresnel * reflectionAmount.x);
+
+    float3 refractionColor = getRefractionColorTex(In, globals, normal, viewDir);
+    // add some underwater fog
+    //refractionColor = lerp(refractionColor, underwaterFogColor.xyz, WATER_DEPTH_VEC.y);
+
+    float3 reflectionColor = getReflectionColorTex(In, globals, normal, viewDir);
+
+    float3 specularLighting = oColor.xyz;
+    oColor.xyz = lerp(refractionColor, reflectionColor, fresnel);
+
+    oColor.xyz += specularLighting;
+
+    oColor.xyz = lerp(refractionColor, oColor.xyz, softIntersect); //* saturate(In.vs.reflRefrCoord.w*0.8));
+
+    return oColor.xyz;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_REFLECTION_COLOR_TEX_FS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    float2 finalCoord2 = In.vs.reflRefrCoord.xy/In.vs.reflRefrCoord.w;
+    finalCoord2 += normal.xy*reflectionRefractionCoeffScale[1];
+    return tex2D(reflectionMap, finalCoord2).xyz;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_REFLECTION_COLOR_FS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    // reflection is already done in the refraction part
+    return oColor;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="FINAL_POS_FS">
+<![CDATA[
+#if defined(WATER_RENDERING)
+    //oColor.xyz = lerp(distanceFogInfo.xyz, oColor.xyz, In.vs.distanceFogFactor);
+#endif
+
+/*#if defined(WATER_RENDERING)
+    oColor.xyz = WATER_DEPTH_VEC.x;
+#endif*/
+/*#if defined(WATER_RENDERING)
+    oColor.xyz = In.vs.reflRefrCoord.w;
+#endif*/
+]]>
+            </CodeInjection>
+        </CodeInjections>
+    </LodLevel>
+</CustomShader>

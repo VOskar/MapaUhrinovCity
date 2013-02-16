@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<careerVehicles>
+    <!-- map01 starting equipment -->
+    <vehicle filename="data/vehicles/steerable/same/sameArgon3-75.xml" xPosition="-48" yOffset="0.5" zPosition="-52" yRotation="180"/>
+    <vehicle filename="data/vehicles/steerable/kramer/kramerKL200.xml" xPosition="-40" yOffset="0.5" zPosition="-52" yRotation="180"/>
+    <vehicle filename="data/vehicles/steerable/buehrer/buehrer6135A.xml" xPosition="-32" yOffset="0.5" zPosition="-52" yRotation="180"/>
+    <vehicle filename="data/vehicles/steerable/fahr/fahrM66.xml" xPosition="-124" yOffset="0.5" zPosition="14.5" yRotation="270"/>
+    <vehicle filename="data/vehicles/steerable/kramer/kramerKL200.xml" xPosition="303" yOffset="0.5" zPosition="570" yRotation="0"/>
+    <vehicle filename="data/vehicles/steerable/kramer/kramerKL200.xml" xPosition="-647" yOffset="0.5" zPosition="497" yRotation="110"/>
+    <vehicle filename="data/vehicles/steerable/kramer/kramerKL200.xml" xPosition="-230.5" yOffset="4.0" zPosition="-723.15" yRotation="255"/>
+    
+    <vehicle filename="data/vehicles/tools/poettinger/poettingerServo35.xml" xPosition="-54" yOffset="0.5" zPosition="-47" yRotation="180"/>
+    <vehicle filename="data/vehicles/tools/lemken/lemkenKristall9.xml" xPosition="-48" yOffset="0.5" zPosition="-47" yRotation="180"/>
+    <vehicle filename="data/vehicles/tools/amazone/amazoneD1.xml" xPosition="-40" yOffset="0.5" zPosition="-47" yRotation="180"/>
+    <vehicle filename="data/vehicles/trailers/krone/kroneEmsland.xml" xPosition="-32" yOffset="0.5" zPosition="-43" yRotation="180"/>
+    <vehicle filename="data/vehicles/steerable/fahr/fahrM66Cutter.xml" xPosition="-128" yOffset="0.5" zPosition="14.5" yRotation="90"/>
+    
+    <vehicle filename="data/vehicles/tools/extraWeight01.xml" xPosition="-48" yOffset="0.5" zPosition="-57" yRotation="0"/>
+    <vehicle filename="data/vehicles/tools/extraWeight01.xml" xPosition="-54" yOffset="0.5" zPosition="-57" yRotation="0"/>
+    
+    <vehicle filename="data/vehicles/steerable/lizard/golfCart.xml" xPosition="802.55" yOffset="0.5" zPosition="616" yRotation="180"/>
+    <vehicle filename="data/vehicles/steerable/lizard/golfCart.xml" xPosition="905" yOffset="0.5" zPosition="730" yRotation="240"/>
+    <vehicle filename="data/vehicles/steerable/lizard/golfCart.xml" xPosition="740" yOffset="0.5" zPosition="615" yRotation="180"/>
+    <vehicle filename="data/vehicles/steerable/lizard/golfCart.xml" xPosition="-407" yOffset="0.5" zPosition="-873" yRotation="130"/>
+</careerVehicles>

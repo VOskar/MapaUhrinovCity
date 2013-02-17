@@ -4687,10 +4687,10 @@
     </IndexedTriangleSet>
     <IndexedTriangleSet name="pdaShape" shapeId="11" bvCenter="0 200 0" bvRadius="3686.34">
       <Vertices count="4" normal="true" uv0="true">
-        <v p="-4000 0 -4000" n="0 1 0" t0="0 1"/>
-        <v p="-4000 0 4000" n="0 1 0" t0="0 0"/>
-        <v p="4000 0 4000" n="0 1 0" t0="1 0"/>
-        <v p="4000 0 -4000" n="0 1 0" t0="1 1"/>
+        <v p="-4096 0 -4096" n="0 1 0" t0="0 1"/>
+        <v p="-4096 0 4096" n="0 1 0" t0="0 0"/>
+        <v p="4096 0 4096" n="0 1 0" t0="1 0"/>
+        <v p="4096 0 -4096" n="0 1 0" t0="1 1"/>
       </Vertices>
       <Triangles count="2">
         <t vi="0 1 2"/>

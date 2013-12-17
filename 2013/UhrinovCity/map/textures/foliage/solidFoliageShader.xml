@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0">
+        <Parameters>
+            <Parameter name="fadeStartEnd" target="In.mat.fadeStartEnd" type="float2" />
+        </Parameters>
+        <CodeInjections>
+            <CodeInjection position="GET_TEXCOORDS_VS">
+<![CDATA[
+// convert from short to 0-1 range
+return In.texCoords[texCoordSet]/32767.0;
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_NORMAL_VS">
+<![CDATA[
+    // we use blendIndices to store normal, since normal attribute does not support UBYTE4 type
+    return In.blendIndices.xyz/127.5 - 1.0;
+]]>
+            </CodeInjection>
+            <CodeInjection position="MATERIALINFO">
+<![CDATA[
+float4 fadeStartEnd;
+]]>
+            </CodeInjection>
+            <CodeInjection position="VS_OUTPUT">
+<![CDATA[
+float alphaOffset;
+]]>
+            </CodeInjection>
+            <CodeInjection position="VS_END">
+<![CDATA[
+Out.alphaOffset = 0.49-saturate((length(viewDir)-In.mat.fadeStartEnd.x)/(In.mat.fadeStartEnd.y-In.mat.fadeStartEnd.x));
+]]>
+            </CodeInjection>
+            <CodeInjection position="POST_ALBEDO_FS">
+<![CDATA[
+albedo.w += In.vs.alphaOffset;
+]]>
+            </CodeInjection>
+        </CodeInjections>
+    </LodLevel>
+</CustomShader>

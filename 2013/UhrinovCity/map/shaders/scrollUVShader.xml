@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0">
+        <Parameters>
+            <Parameter name="scollSpeed" target="scollSpeed" type="float2" defaultValue="0 -0.75 0 0" />
+        </Parameters>
+        <CodeInjections>
+
+            <CodeInjection position="MATERIALINFO">
+                <![CDATA[
+                float2 scollSpeed;
+                ]]>
+          </CodeInjection>
+
+			<CodeInjection position="POST_SET_TEXCOORDS_VS">
+				<![CDATA[
+				#if defined(ALBEDO_MAP) || defined(EMISSIVE_MAP)
+					float2 uv = getTexCoords(In, ALBEDOMAP_TEXCOORD);
+					uv += scollSpeed.xy * time.y;
+					setTexCoords(Out.texCoords[ALBEDOMAP_TEXCOORD/2], ALBEDOMAP_TEXCOORD, uv);
+				#endif
+				]]>
+        	</CodeInjection>
+
+     	  </CodeInjections>
+    </LodLevel>
+</CustomShader>

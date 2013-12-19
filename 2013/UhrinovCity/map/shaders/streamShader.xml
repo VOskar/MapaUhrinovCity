@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0">
+        <Parameters>
+            <Parameter name="directions" target="directions" type="float4" defaultValue="0.15 0 0.13 0" />
+            <Parameter name="alpha" target="alpha" type="float3"/>
+        </Parameters>
+        <CodeInjections>
+
+            <CodeInjection position="MATERIALINFO">
+                <![CDATA[
+                float4 directions;
+                float4 alpha;
+                ]]>
+            </CodeInjection>
+
+			<CodeInjection position="NUM_TEXCOORDS">
+				<![CDATA[
+				#if defined(ALBEDO_MAP)
+                    #defeval ALBEDOMAP_TEXCOORD2 NEXT_TEXCOORD
+                #endif
+				]]>
+        	</CodeInjection>
+			<CodeInjection position="POST_SET_TEXCOORDS_VS">
+				<![CDATA[
+				#if defined(ALBEDO_MAP)
+					float2 uv = getTexCoords(In, ALBEDOMAP_TEXCOORD);
+					float2 uv1 = uv + directions.xy * time.y;
+					float2 uv2 = uv+float2(0.5, 0.2) + directions.zw * time.y;
+					setTexCoords(Out.texCoords[ALBEDOMAP_TEXCOORD/2], ALBEDOMAP_TEXCOORD, uv1);
+					setTexCoords(Out.texCoords[ALBEDOMAP_TEXCOORD2/2], ALBEDOMAP_TEXCOORD2, uv2);
+				#endif
+				]]>
+        	</CodeInjection>
+
+        	<CodeInjection position="POST_ALBEDO_FS">
+                <![CDATA[
+                #if defined(ALBEDO_MAP)
+                    float4 albedo2 = tex2D(baseMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD2));
+                    albedo.xyz = lerp(albedo.xyz, albedo2.xyz, albedo2.w);
+                    albedo.w = max(albedo.w, albedo2.w);
+                #endif
+                ]]>
+	        </CodeInjection>
+            <CodeInjection position="GET_REFLECTION_COLOR_FS">
+                <![CDATA[
+                #if defined(REFLECTION_MAP_2D) || defined(REFLECTION_MAP_CUBE)
+                    res = lerp(oColor.xyz, getReflectionColorTex(In, globals, normal, viewDir)*alpha.x, fresnel);
+                #endif
+                ]]>
+	        </CodeInjection>
+
+     	  </CodeInjections>
+    </LodLevel>
+</CustomShader>

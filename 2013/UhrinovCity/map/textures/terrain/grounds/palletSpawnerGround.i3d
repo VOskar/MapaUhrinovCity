@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<i3D name="palletSpawnerGround" version="1.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://i3d.giants.ch/schema/i3d-1.6.xsd">
+  <Asset>
+    <Export program="GIANTS Editor" version="5.0.1"/>
+  </Asset>
+
+  <Files>
+    <File fileId="1" filename="leakyConcreteWall_diffuse.png" relativePath="true"/>
+  </Files>
+
+
+  <Materials>
+    <Material name="leakyConcreteWall_diffuse" materialId="6" ambientColor="1 1 1">
+      <Texture fileId="1"/>
+    </Material>
+  </Materials>
+
+
+  <Shapes>
+    <IndexedTriangleSet name="palletSpawnerGround" shapeId="1" bvCenter="0 0.0500049 0" bvRadius="1.4151" isOptimized="true">
+      <Vertices count="20" normal="true" uv0="true">
+        <v p="-1 0 1" n="-1 0 0" t0="0.86333 0.115409"/>
+        <v p="-1 0.10001 1" n="-1 0 0" t0="0.86333 0.188082"/>
+        <v p="-1 0.10001 -1" n="-1 0 0" t0="0.13667 0.188082"/>
+        <v p="-1 0 -1" n="-1 0 0" t0="0.13667 0.115409"/>
+        <v p="-1 0.10001 1" n="0 1 0" t0="0.942717 0.16693"/>
+        <v p="1 0.10001 1" n="0 1 0" t0="1.24104 0.16693"/>
+        <v p="1 0.10001 -1" n="0 1 0" t0="1.24104 0.763567"/>
+        <v p="-1 0.10001 -1" n="0 1 0" t0="0.942717 0.763568"/>
+        <v p="1 0.10001 1" n="1 0 0" t0="0.13667 0.188082"/>
+        <v p="1 0 1" n="1 0 0" t0="0.13667 0.115409"/>
+        <v p="1 0 -1" n="1 0 0" t0="0.86333 0.115409"/>
+        <v p="1 0.10001 -1" n="1 0 0" t0="0.86333 0.188082"/>
+        <v p="1 0 1" n="0 0 1" t0="0.86333 0.115409"/>
+        <v p="1 0.10001 1" n="0 0 1" t0="0.86333 0.188082"/>
+        <v p="-1 0.10001 1" n="0 0 1" t0="0.13667 0.188082"/>
+        <v p="-1 0 1" n="0 0 1" t0="0.13667 0.115409"/>
+        <v p="-1 0 -1" n="0 0 -1" t0="0.86333 0.115409"/>
+        <v p="-1 0.10001 -1" n="0 0 -1" t0="0.86333 0.188082"/>
+        <v p="1 0.10001 -1" n="0 0 -1" t0="0.13667 0.188082"/>
+        <v p="1 0 -1" n="0 0 -1" t0="0.13667 0.115409"/>
+      </Vertices>
+      <Triangles count="10">
+        <t vi="0 1 2"/>
+        <t vi="2 3 0"/>
+        <t vi="4 5 6"/>
+        <t vi="6 7 4"/>
+        <t vi="8 9 10"/>
+        <t vi="10 11 8"/>
+        <t vi="12 13 14"/>
+        <t vi="14 15 12"/>
+        <t vi="16 17 18"/>
+        <t vi="18 19 16"/>
+      </Triangles>
+      <Subsets count="1">
+        <Subset firstVertex="0" numVertices="20" firstIndex="0" numIndices="30"/>
+      </Subsets>
+    </IndexedTriangleSet>
+  </Shapes>
+
+
+  <Dynamics>
+  </Dynamics>
+
+  <Scene>
+    <Shape name="palletSpawnerGround" static="true" clipDistance="150" nodeId="10" materialIds="6" shapeId="1" castsShadows="true" receiveShadows="true"/>
+  </Scene>
+
+</i3D>

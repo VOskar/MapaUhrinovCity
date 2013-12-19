@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0">
+        <Parameters>
+        </Parameters>
+
+        <CodeInjections>
+            <CodeInjection position="POST_ALBEDO_FS">
+<![CDATA[
+
+float repeatingTime = frac(time.y*0.25);
+float power = 2*saturate(repeatingTime*4 - 3); // start at 0.75 and have max at 1
+
+albedo.xyz *= 1 + power * float3(2,1.5,1);
+]]>
+	        </CodeInjection>
+        </CodeInjections>
+    </LodLevel>
+</CustomShader>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0">
+        <Parameters>
+        </Parameters>
+        <CodeInjections>
+
+            <CodeInjection position="GET_POSITION_VS">
+<![CDATA[
+// Note: this shader only is for emissive materials since the normals are not adjusted
+
+float3x3 billboardMat = modelViewMatrix;
+
+return float4(mul(In.position.xyz, billboardMat), 1);
+]]>
+            </CodeInjection>
+        </CodeInjections>
+    </LodLevel>
+</CustomShader>

@@ -1,0 +1,458 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CustomShader version="2" classRequirement="">
+    <LodLevel startDistance="0" subsequentPassForceMode="use">
+        <Parameters>
+            <Parameter name="dirtAndTextureUVScaleOffset" target="dirtAndTextureUVScaleOffset" type="float4"/>
+            <Parameter name="alphaBlendStartEnd" target="alphaBlendStartEnd" type="float4" defaultValue="75 80"/>
+            <Parameter name="channel1Color" target="channel1Color" type="float4" defaultValue="1 0 1 0"/>
+            <Parameter name="channel2Color" target="channel2Color" type="float4" defaultValue="1 0 1 0"/>
+            <Parameter name="channel3Color" target="channel3Color" type="float4" defaultValue="1 0 1 0"/>
+            <Parameter name="channel4Color" target="channel4Color" type="float4" defaultValue="1 0 1 0"/>
+        </Parameters>
+        <Textures>
+          <Texture name="blendMap" />
+          <Texture name="blendMap2" />
+          <Texture name="noiseMap" />
+          <Texture name="heightMap" />
+          <Texture name="normalMap2" />
+        </Textures>
+        <CodeInjections>
+            <CodeInjection position="NUM_TEXCOORDS">
+<![CDATA[
+#if defined(DIFFUSE) // if diffuse is defined, we are in color output mode
+#define USE_GROUND_SHADER_COLOR
+#endif
+
+#if defined(USE_GROUND_SHADER_COLOR)
+    #defeval DIRT_TEXCOORD NEXT_TEXCOORD
+#endif
+
+#defeval BLENDMAP_TEXCOORD NEXT_TEXCOORD
+
+]]>
+            </CodeInjection>
+            <CodeInjection position="CONFIG_DEFINES">
+<![CDATA[
+
+#if !defined(TERRAIN_DETAIL_CHANNEL_1) && !defined(TERRAIN_DETAIL_CHANNEL_2)
+    #undef NORMAL_MAP
+#endif
+#undef ALPHA_TESTED
+#undef PARALLAX_MAP
+#undef PARALLAX_MAPPING
+#if defined(USE_GROUND_SHADER_COLOR)
+    #define _NEED_FS_EYE_VECTOR
+    #undef _NEED_FS_NORMAL
+    // we need tangent space vectors
+    #undef _NO_TANGENTSPACE
+    #undef _NO_TANGENTSPACE_LIGHT
+
+    //#define PARALLAX_MAPPING
+    //#define PARALLAX_OCCLUSION_MAPPING
+#endif
+
+#if GPU_PROFILE <= GPU_PROFILE_LOW
+#undef TERRAIN_DETAIL_CHANNEL_6
+#endif
+
+//#define _HAS_TEXTURES
+]]>
+            </CodeInjection>
+            <CodeInjection position="SAMPLERS">
+<![CDATA[
+
+sampler2D blendMap : TEXUNITN;
+sampler2D noiseMap : TEXUNITN;
+#if defined(USE_GROUND_SHADER_COLOR)
+    #if defined(TERRAIN_DETAIL_CHANNEL_5) || defined(TERRAIN_DETAIL_CHANNEL_6)
+        sampler2D blendMap2 : TEXUNITN;
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+        sampler2D normalMap2 : TEXUNITN;
+    #endif
+    sampler2D heightMap : TEXUNITN;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="MATERIALINFO">
+<![CDATA[
+float4 dirtAndTextureUVScaleOffset;
+float2 alphaBlendStartEnd;
+float3 channel1Color;
+float3 channel2Color;
+float3 channel3Color;
+float3 channel4Color;
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_NORMAL_VS">
+<![CDATA[
+    // convert from ubyte to [-1,1] range
+    return In.normal.xyz/127.5 - 1.0;
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_TANGENT_VS">
+<![CDATA[
+#if defined(USE_GROUND_SHADER_COLOR)
+    return normalize(cross(In.normal.xyz/127.5 - 1.0, float3(0,0,1)));
+#else
+    return float3(1,0,0);
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_BITANGENT_VS">
+<![CDATA[
+#if defined(USE_GROUND_SHADER_COLOR)
+    float3 tangent = getTangent(In);
+    return normalize(cross(tangent, In.normal.xyz/127.5 - 1.0));
+#else
+    return float3(0,0,1);
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_BITANGENT_SIDE_VS">
+<![CDATA[
+return -1.0;
+]]>
+            </CodeInjection>
+			<CodeInjection position="GET_TEXCOORDS_VS">
+<![CDATA[
+return In.texCoords[texCoordSet].xy;
+]]>
+			</CodeInjection>
+			<CodeInjection position="POST_SET_TEXCOORDS_VS">
+<![CDATA[
+float2 albedoTexCoord = getTexCoords(In, ALBEDOMAP_INPUT_TEXCOORD);
+
+setTexCoords(Out.texCoords[ALBEDOMAP_TEXCOORD/2], ALBEDOMAP_TEXCOORD, position.xz*dirtAndTextureUVScaleOffset.zz + dirtAndTextureUVScaleOffset.ww);
+#if defined(USE_GROUND_SHADER_COLOR)
+    setTexCoords(Out.texCoords[DIRT_TEXCOORD/2], DIRT_TEXCOORD, position.xz*dirtAndTextureUVScaleOffset.xy);
+#endif
+
+setTexCoords(Out.texCoords[BLENDMAP_TEXCOORD/2], BLENDMAP_TEXCOORD, albedoTexCoord);
+]]>
+            </CodeInjection>
+            <CodeInjection position="VS_OUTPUT">
+<![CDATA[
+float alphaScale : VARYINGN;
+]]>
+            </CodeInjection>
+            <CodeInjection position="VS_END">
+<![CDATA[
+Out.alphaScale = saturate((length(viewDir)-(alphaBlendStartEnd.x))/(alphaBlendStartEnd.x-alphaBlendStartEnd.y));
+]]>
+            </CodeInjection>
+            <CodeInjection position="FS_GLOBALS">
+<![CDATA[
+float noise;
+float4 noisedBlendMap;
+float4 blendMap;
+#if defined(TERRAIN_DETAIL_CHANNEL_5) || defined(TERRAIN_DETAIL_CHANNEL_6)
+    float2 blendMap2;
+#endif
+float4 channelWeights;
+float4 steppedChannelWeights;
+float4 noisedChannelWeights;
+
+#if defined(USE_GROUND_SHADER_COLOR)
+    float dirt;
+    #if defined(TERRAIN_DETAIL_CHANNEL_6)
+        float sinAngle;
+        float cosAngle;
+    #endif
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="START_FS">
+<![CDATA[
+globals.noise = tex2D(noiseMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy).x;
+float2 origBlend2TexCoord = getTexCoords(In, globals, BLENDMAP_TEXCOORD).xy;
+
+globals.blendMap = tex2D(blendMap, getTexCoords(In, globals, BLENDMAP_TEXCOORD).xy);
+#if defined(USE_GROUND_SHADER_COLOR)
+    #if defined(TERRAIN_DETAIL_CHANNEL_5) || defined(TERRAIN_DETAIL_CHANNEL_6)
+        float2 blend2TexCoord = getTexCoords(In, globals, BLENDMAP_TEXCOORD).xy;
+
+        //#if defined(TERRAIN_DETAIL_CHANNEL_5)
+            const float textureSize = TERRAIN_DETAIL_TEXTURE_SIZE;
+            const float texelSize = 1.0 / textureSize;
+
+            blend2TexCoord *= textureSize;
+            // TODO: check if this is also needed on DX9, XBOX and PS3
+            blend2TexCoord -= 0.5;
+
+            float2 f = frac(blend2TexCoord); // get the decimal part
+            blend2TexCoord = floor(blend2TexCoord-f) * texelSize; // move blend coord to start of pixel
+
+            globals.blendMap2.xy = tex2D(blendMap2, blend2TexCoord).xw;
+
+            float2 tr = tex2D(blendMap2, blend2TexCoord + float2(texelSize, 0.0)).xw;
+            float2 bl = tex2D(blendMap2, blend2TexCoord + float2(0.0, texelSize)).xw;
+            float2 br = tex2D(blendMap2, blend2TexCoord + float2(texelSize , texelSize)).xw;
+            float tA = lerp(globals.blendMap2.x, tr.x, f.x);
+            float tB = lerp(bl.x, br.x, f.x);
+            globals.blendMap2.x = lerp(tA, tB, f.y);
+            globals.blendMap2.y = max(max(globals.blendMap2.y, tr.y), max(bl.y, br.y));
+        //#else
+        //    globals.blendMap2 = tex2D(blendMap2, blend2TexCoord);
+        //#endif
+    #endif
+#endif
+
+globals.channelWeights = float4(0,0,0,0);
+#if defined(TERRAIN_DETAIL_CHANNEL_1)
+    globals.channelWeights.x = globals.blendMap.x;
+#endif
+#if defined(TERRAIN_DETAIL_CHANNEL_2)
+    globals.channelWeights.y = globals.blendMap.y;
+#endif
+#if defined(TERRAIN_DETAIL_CHANNEL_3)
+    globals.channelWeights.z = globals.blendMap.z;
+#endif
+#if defined(TERRAIN_DETAIL_CHANNEL_4)
+    globals.channelWeights.w = globals.blendMap.w;
+#endif
+globals.noisedChannelWeights = globals.channelWeights*globals.noise;
+
+globals.steppedChannelWeights = float4(0,0,0,0);
+#if defined(TERRAIN_DETAIL_CHANNEL_1)
+    globals.steppedChannelWeights.x = 1;
+    #if defined(TERRAIN_DETAIL_CHANNEL_2)
+        globals.steppedChannelWeights.x *= step(globals.noisedChannelWeights.y, globals.noisedChannelWeights.x);
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_3)
+        globals.steppedChannelWeights.x *= step(globals.noisedChannelWeights.z, globals.noisedChannelWeights.x);
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_4)
+        globals.steppedChannelWeights.x *= step(globals.noisedChannelWeights.w, globals.noisedChannelWeights.x);
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+        globals.steppedChannelWeights.x = min(globals.steppedChannelWeights.x + step(0.08, globals.noisedChannelWeights.x), 1);
+    #endif
+#endif
+#if defined(TERRAIN_DETAIL_CHANNEL_2)
+    globals.steppedChannelWeights.y = 1;
+    #if defined(TERRAIN_DETAIL_CHANNEL_3)
+        globals.steppedChannelWeights.y *= step(globals.noisedChannelWeights.z, globals.noisedChannelWeights.y);
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_4)
+        globals.steppedChannelWeights.y *= step(globals.noisedChannelWeights.w, globals.noisedChannelWeights.y);
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+        globals.steppedChannelWeights.y = min(globals.steppedChannelWeights.y + step(0.08, globals.noisedChannelWeights.y), 1);
+    #endif
+    globals.steppedChannelWeights.y *= 1-globals.steppedChannelWeights.x;
+#endif
+#if defined(TERRAIN_DETAIL_CHANNEL_3)
+    globals.steppedChannelWeights.z = 1;
+    #if defined(TERRAIN_DETAIL_CHANNEL_4)
+        globals.steppedChannelWeights.z *= step(globals.noisedChannelWeights.w, globals.noisedChannelWeights.z);
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_4)
+        globals.steppedChannelWeights.z = min(globals.steppedChannelWeights.z + step(0.08, globals.noisedChannelWeights.z), 1);
+    #endif
+    globals.steppedChannelWeights.z *= 1-globals.steppedChannelWeights.x - globals.steppedChannelWeights.y;
+#endif
+#if defined(TERRAIN_DETAIL_CHANNEL_4)
+    globals.steppedChannelWeights.w = 1-globals.steppedChannelWeights.x - globals.steppedChannelWeights.y-globals.steppedChannelWeights.z;
+#endif
+
+#if defined(USE_GROUND_SHADER_COLOR)
+    globals.dirt = tex2D(noiseMap, getTexCoords(In, globals, DIRT_TEXCOORD)).w*1.2;
+
+    #if defined(TERRAIN_DETAIL_CHANNEL_6)
+        float angle = ceil(globals.blendMap2.y*3-0.0001)/4*3.14159;
+
+        sincos(angle, globals.sinAngle, globals.cosAngle);
+
+        float2 newTexCoord = getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy;
+        newTexCoord = float2(newTexCoord.x * globals.cosAngle - newTexCoord.y * globals.sinAngle, newTexCoord.x * globals.sinAngle + newTexCoord.y * globals.cosAngle);
+        if (((ALBEDOMAP_TEXCOORD/2) % 2) == 0) {
+            In.vs.texCoords[ALBEDOMAP_TEXCOORD/2].xy = newTexCoord;
+        } else {
+            In.vs.texCoords[ALBEDOMAP_TEXCOORD/2].zw = newTexCoord;
+        }
+
+    #endif
+
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="PARALLAX_MAPPING_FS">
+<![CDATA[
+#if defined(USE_GROUND_SHADER_COLOR)
+    //float bumpHeight = tex2D(heightMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).a;
+    #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+    {
+        float2 parallaxTexOffset;
+        float2 rotatedViewDir = viewDir.xy;
+        #if defined(TERRAIN_DETAIL_CHANNEL_6)
+            // Note: tangent space is left-handed and we rotate by -angle
+            rotatedViewDir = float2(rotatedViewDir.x * globals.cosAngle - rotatedViewDir.y * globals.sinAngle, rotatedViewDir.x * globals.sinAngle + rotatedViewDir.y * globals.cosAngle);
+        #endif
+        // Use default parallax mapping
+        float height = getBumpHeight(In, globals);
+        parallaxTexOffset = rotatedViewDir.xy * (height * 0.07 -0.035);
+        for (int i=0; i < NUM_TEXCOORDS; i++) {
+            addToTexCoords(In.vs.texCoords[i/2], i, parallaxTexOffset);
+        }
+    }
+    #endif
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="POST_ALBEDO_FS">
+<![CDATA[
+//getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy;
+#if defined(USE_GROUND_SHADER_COLOR)
+
+    //albedo = tex2D( baseMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy, ddx(In.vs.texCoords[ALBEDOMAP_TEXCOORD/2].xy), ddy(In.vs.texCoords[ALBEDOMAP_TEXCOORD/2].xy));
+
+    float4 texColor = tex2D(baseMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD).xy);
+    albedo = float4(0,0,0, 1);
+    #if defined(TERRAIN_DETAIL_CHANNEL_1)
+        #if defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            albedo.xyz += channel1Color * texColor.x * globals.steppedChannelWeights.x;
+        #else
+            albedo.xyz += channel1Color * texColor.x;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_2)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            albedo.xyz += channel2Color * texColor.y * globals.steppedChannelWeights.y;
+        #else
+            albedo.xyz += channel2Color * texColor.y;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_3)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            albedo.xyz += channel3Color * texColor.z * globals.steppedChannelWeights.z;
+        #else
+            albedo.xyz += channel3Color * texColor.z;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_4)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3)
+            albedo.xyz += channel4Color * texColor.w * globals.steppedChannelWeights.w;
+        #else
+            albedo.xyz += channel4Color * texColor.w;
+        #endif
+    #endif
+
+
+    #if defined(TERRAIN_DETAIL_CHANNEL_5)
+        //albedo.xyz = lerp(albedo.xyz, albedo.xyz*0.7, globals.blendMap2.x);
+        albedo.xyz *= (1 - 0.3*globals.blendMap2.x);
+        //albedo.xyz = lerp(albedo.xyz, albedo.xyz*0.04, globals.blendMap2.x*globals.noise);
+    #endif
+
+    //albedo += tex2D( baseMap, newTexCoord2);
+    //albedo *= 0.5;
+
+    albedo.xyz *= globals.dirt;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_NORMAL_FS">
+<![CDATA[
+#if defined(USE_GROUND_SHADER_COLOR) && (defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4))
+    float3 myNormal = float3(0,0,0);
+    #if defined(TERRAIN_DETAIL_CHANNEL_1)
+        #if defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            myNormal.xy += (tex2D(normalMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).xy * 2.0 - 1.0)*globals.steppedChannelWeights.x;
+        #else
+            myNormal.xy += tex2D(normalMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).xy * 2.0 - 1.0;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_2)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            myNormal.xy += (tex2D(normalMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).zw * 2.0 - 1.0)*globals.steppedChannelWeights.y;
+        #else
+            myNormal.xy += tex2D(normalMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).zw * 2.0 - 1.0;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_3)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            myNormal.xy += (tex2D(normalMap2, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).xy * 2.0 - 1.0)*globals.steppedChannelWeights.z;
+        #else
+            myNormal.xy += (tex2D(normalMap2, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).xy * 2.0 - 1.0);
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_4)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3)
+            myNormal.xy += (tex2D(normalMap2, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).zw * 2.0 - 1.0)*globals.steppedChannelWeights.w;
+        #else
+            myNormal.xy += tex2D(normalMap2, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).zw * 2.0 - 1.0;
+        #endif
+    #endif
+    myNormal.z = sqrt(1.0 - dot(myNormal.xy, myNormal.xy));
+    #if defined(TERRAIN_DETAIL_CHANNEL_6)
+        // Note: tangent space is left-handed
+        myNormal.xy = float2(myNormal.x * globals.cosAngle + myNormal.y * globals.sinAngle, -myNormal.x * globals.sinAngle + myNormal.y * globals.cosAngle);
+    #endif
+    return normalize(myNormal);
+#else
+    return float3(0,1,0);
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="GET_BUMP_HEIGHT_OFFSETED_FS">
+<![CDATA[
+#if defined(USE_GROUND_SHADER_COLOR)
+    float4 myHeight = tex2D(heightMap, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD) + offset);
+    float finalHeight = 0;
+    #if defined(TERRAIN_DETAIL_CHANNEL_1)
+        #if defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            finalHeight += myHeight.x*globals.steppedChannelWeights.x;
+        #else
+            finalHeight += myHeight.x;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_2)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_3) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            finalHeight += myHeight.y*globals.steppedChannelWeights.y;
+        #else
+            finalHeight += myHeight.y;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_3)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_4)
+            finalHeight += myHeight.z*globals.steppedChannelWeights.z;
+        #else
+            finalHeight += myHeight.z;
+        #endif
+    #endif
+    #if defined(TERRAIN_DETAIL_CHANNEL_4)
+        #if defined(TERRAIN_DETAIL_CHANNEL_1) || defined(TERRAIN_DETAIL_CHANNEL_2) || defined(TERRAIN_DETAIL_CHANNEL_3)
+            finalHeight += myHeight.w*globals.steppedChannelWeights.w;
+        #else
+            finalHeight += myHeight.w;
+        #endif
+    #endif
+    return finalHeight;
+#else
+    return 0;
+#endif
+]]>
+            </CodeInjection>
+            <CodeInjection position="FINAL_POS_FS">
+<![CDATA[
+
+#if defined(TERRAIN_DETAIL_CHANNEL_3)
+    //oColor.xyz *= 0.001;
+    //oColor.xy += tex2D(normalMap2, getTexCoords(In, globals, ALBEDOMAP_TEXCOORD)).xy;
+#endif
+
+float sum = (globals.noisedChannelWeights.x+globals.noisedChannelWeights.y+globals.noisedChannelWeights.z+globals.noisedChannelWeights.w)*In.vs.alphaScale;
+
+/*
+if (sum < 0.12) {
+    discard;
+}
+*/
+clip(sum - 0.12);  // X360 can't handle discard; this does the same thing with clip
+]]>
+            </CodeInjection>
+        </CodeInjections>
+    </LodLevel>
+</CustomShader>
